@@ -1,0 +1,55 @@
+#include <msp430.h> 
+
+
+/**
+ * main.c
+ */
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+    PM5CTL0 &= ~LOCKLPM5; //unlocks the gpio pins
+
+    P1DIR |= BIT0; //P1.0 is an output
+    P1DIR &= ~BIT1; //sets direction to input
+
+    P1REN |= BIT1; //enables the pull up resistor
+    P1OUT |= BIT1; //sets pullup resistor
+
+    P1IE |= BIT1;  //interrupt
+    P1IES |= BIT1; //sets interrupted for the positive clock edge
+    P1IFG &= ~BIT1; //clears the flag
+
+    TB0CTL=TBSSEL_1 + MC_1 + ID_3; //Makes Aclk in up mode with an 8 divider
+    TB0CCR0 = 500; //count to have led blink at
+    TB0CCTL0 |= CCIE; //enables the interrupt
+
+
+    _BIS_SR(LPM0_bits + GIE); //low power mode and global interrupt
+}
+#pragma vector=TIMER0_B0_VECTOR
+__interrupt void TIMER0_B0(void)
+{
+    P1OUT ^= BIT0; //toggles P1.0
+}
+
+#pragma vector = PORT1_VECTOR;
+    __interrupt void Port_1(void)
+    {
+        if(P1IES & BIT1){//if falling edge is detected of button
+            P1OUT &= ~BIT0;//turn of p1.0 LED
+            P1IES &= ~BIT1; //interrupt on the clock edge, negative
+            TBCTL = TBCLR; //clears the time to begin counting
+            TB0CTL=TBSSEL_1 + MC_2 + ID_3;   //sets timer as ACLK in cont mode with an 8 divider
+
+        }
+        else
+        {
+            TB0CTL = MC_0; //stops the timer
+            TB0CCR0 = TB0R; //changes up timer count range to length of time button was pressed
+            TBCTL = TBCLR; //clears the timer
+            TB0CTL=TBSSEL_1 + MC_1 + ID_3; //Makes Aclk in up mode with an 8 divider
+            P1IES |=BIT1; //sets a positive clock edge interrupt
+        }
+        P1IFG &= ~BIT1; //resets interrupt flag
+    }
+
