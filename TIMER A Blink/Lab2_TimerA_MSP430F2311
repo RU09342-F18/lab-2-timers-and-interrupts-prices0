@@ -1,0 +1,34 @@
+#include <msp430.h> 
+
+int main(void)
+{
+  WDTCTL = WDTPW + WDTHOLD;     // Stop WDT
+  PM5CTL0 &= ~LOCKLPM5; //unlocks the gpio pins
+  P1DIR |= BIT0;            // P1.0 and P1.6 pins output the rest are input
+  P2DIR |= BIT0;
+
+
+  TB0CCTL0 |= CCIE;                             // CCR0 interrupt enabled
+  TB0CTL = TBSSEL_2 + MC_3 + ID_3;           // SMCLK/8, up mode
+  TB0CCR0 =  0x2000;                     // frequency to blink
+
+  TB1CCTL0 |= CCIE;                             // CCR0 interrupt enabled
+  TB1CTL = TBSSEL_2 + MC_3 + ID_3;           // SMCLK/8, up mode
+  TB1CCR0 =  0x6500;                     // frequency to blink
+
+  _BIS_SR(CPUOFF + GIE);          //low power mode enabled
+}
+
+// Timer B0 interrupt service routine
+#pragma vector=TIMER0_B0_VECTOR
+__interrupt void Timer0_B0(void)
+{
+   P1OUT ^= BIT0;                          // Toggle P1.0
+}
+
+// Timer B1 interrupt service routine
+#pragma vector=TIMER1_B0_VECTOR
+__interrupt void Timer1_B0 (void)
+{
+   P2OUT ^= BIT0; // Toggle P1.6
+}
