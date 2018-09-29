@@ -1,12 +1,15 @@
+Author: Shane Price
+Last Edited: 09/28/18
+
 # Button Based Delay
-Now that you have begun to familiarize yourself with the TIMER modules, why don't we make an interesting change to our code from the last lab.
+This part of the lab the task was to have an LED blink at a rate corresponding to how long a button was pressed. IE hold the button for 2 seconds the LED blinks once every 2 seconds. This was done on two different boards, the MSP430G2553 and the MSP430FR2311. 
 
-## Task
-Setup your microcontroller to initially blink and LED at a rate of 10Hz upon restarting or powering up. Then utilizing one of the buttons on board, a user should be able to set the delay or blinking rate of the LED by holding down a button. The duration in which the button is depressed should then become the new rate at which the LED blinks. As previously stated, you most likely will want to take advantage of the fact that TIMER modules exist and see if you can let them do a bulk of the work for you.
+This was done by initially having the LED blink at a specified rate then would change on the interrupt, button press. When the button was pressed the interrupt begins and a timer begins to count the amount of time it is held down for, then once the button is released the timer turns off and the time is stored, timer is reset, set back to up mode from contniuous mode of counting the time, the interrupt flags are reset as well. At this time the LED blinks at the rate corresponding to the length of time the button was pressed for, as explained above. 
 
-### Extra Work
-## Reset Button
-What is a piece of electronics without a reset button? Instead of relying on resetting your processor using the built in reset circuitry, why not instead use another button to reset the rate back to 10Hz.
-
-## Button Based Hertz
-Most likely using two buttons, what if instead of making a delay loop based on the time, the user could instead enter a mode where the number of times they pressed the button would become the number in Hz of the blinking rate? How do you think you would implement that with just one button?
+## Inputs/Outputs
+### MSP430G2553
+Inputs: P1.1-Button
+Outputs: P1.0 LED
+### MSP430FR2311
+Inputs: P1.3-Button
+Outputs: P1.0 LED
